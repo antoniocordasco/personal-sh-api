@@ -18,4 +18,5 @@ export const config = {
   host: process.env.HOST ?? '0.0.0.0', // listen on the LAN so a phone can reach it
   auth0Domain: required('AUTH0_DOMAIN'),
   auth0Audience: required('AUTH0_AUDIENCE'),
+  databaseUrl: required('DATABASE_URL'),
 };

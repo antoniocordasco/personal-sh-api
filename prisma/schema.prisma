@@ -1,0 +1,23 @@
+// Prisma schema — https://pris.ly/d/prisma-schema
+// After changing models: `npm run db:migrate -- --name <what-changed>`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  /// Auth0 user id (the access token's `sub`), e.g. "google-oauth2|1098…"
+  auth0Id   String   @unique @map("auth0_id")
+  email     String?
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
