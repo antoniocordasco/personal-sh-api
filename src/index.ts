@@ -1,15 +1,29 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
+import { GraphQLError } from 'graphql';
 
-import { resolvers, typeDefs } from './schema.js';
+import { getUserFromAuthHeader } from './auth.js';
+import { config } from './config.js';
+import { resolvers, typeDefs, type Context } from './schema.js';
 
-const port = Number(process.env.PORT ?? 4000);
-const host = process.env.HOST ?? '0.0.0.0'; // listen on the LAN so a phone can reach it
-
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer<Context>({ typeDefs, resolvers });
 
 const { url } = await startStandaloneServer(server, {
-  listen: { port, host },
+  listen: { port: config.port, host: config.host },
+  context: async ({ req }) => {
+    const hasToken = Boolean(req.headers.authorization);
+    console.log(
+      `[${new Date().toISOString()}] ${req.method} request from ${req.socket.remoteAddress} (token: ${hasToken ? 'yes' : 'no'})`,
+    );
+    try {
+      return { user: await getUserFromAuthHeader(req.headers.authorization) };
+    } catch (err) {
+      console.warn(`  ✗ token rejected: ${err instanceof Error ? err.message : String(err)}`);
+      throw new GraphQLError('Invalid or expired token', {
+        extensions: { code: 'UNAUTHENTICATED', http: { status: 401 } },
+      });
+    }
+  },
 });
 
 console.log(`Apollo Server ready at ${url}`);

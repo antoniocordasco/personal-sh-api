@@ -24,3 +24,12 @@ npm start            # runs dist/index.js
 ```
 
 Config via env vars (see `.env.example`): `PORT` (default 4000), `HOST` (default 0.0.0.0).
+
+## Authentication (Auth0)
+
+Requests may send an Auth0 access token as `Authorization: Bearer <token>`.
+The token is verified in `src/auth.ts` (signature via the tenant's JWKS, issuer, audience, expiry).
+Copy `.env.example` to `.env` and set `AUTH0_DOMAIN` and `AUTH0_AUDIENCE` (the API identifier).
+
+- `hello`, `serverTime` — public
+- `me` — requires a valid token; returns the Auth0 user id plus email/name from `/userinfo`
