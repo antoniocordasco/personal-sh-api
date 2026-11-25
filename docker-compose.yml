@@ -1,0 +1,40 @@
+# Runs the API and its Postgres database.
+# Needs a .env next to this file with POSTGRES_PASSWORD, AUTH0_DOMAIN and AUTH0_AUDIENCE
+# (see .env.server.example).
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: personal_sh
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: personal_sh
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # only reachable from the server itself (use an SSH tunnel to connect from the Mac)
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U personal_sh -d personal_sh"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 4000
+      HOST: 0.0.0.0
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN:?set AUTH0_DOMAIN in .env}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:?set AUTH0_AUDIENCE in .env}
+      DATABASE_URL: postgresql://personal_sh:${POSTGRES_PASSWORD}@db:5432/personal_sh?schema=public
+    ports:
+      - "4000:4000"
+
+volumes:
+  pgdata:
