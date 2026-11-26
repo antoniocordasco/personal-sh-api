@@ -19,5 +19,34 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  // Profile — all optional, filled in by the user on the Profile screen
+  style    ClothingStyle?
+  sex      Sex?
+  heightCm Int?           @map("height_cm")
+  weightKg Float?         @map("weight_kg")
+  age      Int?
+
   @@map("users")
+}
+
+enum Sex {
+  FEMALE
+  MALE
+  OTHER
+
+  @@map("sex")
+}
+
+enum ClothingStyle {
+  CASUAL
+  SMART_CASUAL
+  FORMAL
+  STREETWEAR
+  SPORTY
+  MINIMALIST
+  CLASSIC
+  BOHEMIAN
+  VINTAGE
+
+  @@map("clothing_style")
 }
