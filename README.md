@@ -62,6 +62,14 @@ docker compose restart api
 docker compose exec db psql -U personal_sh personal_sh
 ```
 
+Database access from the Mac (opens an SSH tunnel, reads the password from the server's `.env`, and closes the tunnel when you exit):
+
+```bash
+./scripts/db.sh            # Prisma Studio in the browser
+./scripts/db.sh psql       # psql shell
+./scripts/db.sh tunnel     # just the tunnel + connection details, for TablePlus/DBeaver
+```
+
 Backups: `scripts/backup.sh` dumps the database to `~/backups` (keeps 14 days). Schedule it daily with `crontab -e`:
 
 ```
