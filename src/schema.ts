@@ -41,7 +41,8 @@ export const typeDefs = /* GraphQL */ `
   }
 
   input ProfileInput {
-    style: ClothingStyle
+    "Replaces the whole list; send [] (or null) to clear it"
+    styles: [ClothingStyle!]
     sex: Sex
     "Height in centimetres (50–250)"
     heightCm: Int
@@ -60,7 +61,7 @@ export const typeDefs = /* GraphQL */ `
     name: String
     "ISO timestamp of when the user first called the API"
     createdAt: String!
-    style: ClothingStyle
+    styles: [ClothingStyle!]!
     sex: Sex
     heightCm: Int
     weightKg: Float
@@ -69,7 +70,7 @@ export const typeDefs = /* GraphQL */ `
 `;
 
 type ProfileInput = {
-  style?: ClothingStyle | null;
+  styles?: ClothingStyle[] | null;
   sex?: Sex | null;
   heightCm?: number | null;
   weightKg?: number | null;
@@ -183,11 +184,17 @@ export const resolvers = {
 
       // make sure the row exists (e.g. the very first request is a save)
       const user = await getOrCreateUser(auth);
-      const { style, sex, heightCm, weightKg, age } = args.input;
+      const { styles, sex, heightCm, weightKg, age } = args.input;
       const updated = await prisma.user.update({
         where: { id: user.id },
-        // undefined = leave unchanged, null = clear
-        data: { style, sex, heightCm, weightKg, age },
+        // undefined = leave unchanged, null = clear (a list can't be null, so it becomes [])
+        data: {
+          styles: styles === undefined ? undefined : [...new Set(styles ?? [])],
+          sex,
+          heightCm,
+          weightKg,
+          age,
+        },
       });
       console.log(`  ✓ profile saved for user #${updated.id}`);
       return updated;

@@ -20,7 +20,7 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Profile — all optional, filled in by the user on the Profile screen
-  style    ClothingStyle?
+  styles   ClothingStyle[] @default([])
   sex      Sex?
   heightCm Int?           @map("height_cm")
   weightKg Float?         @map("weight_kg")
